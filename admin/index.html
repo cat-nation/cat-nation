@@ -4,18 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Citizen Admin Console</title>
-    <link rel="stylesheet" href="https://unpkg.com@^4.0.0/dist/main.css" />
+    <!-- Loads from an alternate secure network -->
+    <script src="https://unpkg.com@^3.0.0/dist/decap-cms.js"></script>
   </head>
   <body>
-    <script src="https://unpkg.com@^4.0.0/dist/static-cms-core.js"></script>
     <script>
-      // This injects the configuration rules directly into the dashboard script
-      window.CMS.init({
+      // Injects config settings cleanly into your webpage layout
+      CMS.init({
         config: {
           backend: {
             name: 'github',
-            repo: 'cat-nation/cat-nation', // <-- CHANGE THIS TO YOUR EXACT USERNAME/REPONAME
-            branch: 'main' // <-- Change to 'master' if your main branch is called master
+            repo: 'cat-nation/cat-nation', // <-- EXPLICITLY TYPE YOUR GITHUB USERNAME/REPOSITORY NAME
+            branch: 'main' // <-- Switch to 'master' if your repo branch name is master
           },
           media_folder: 'images',
           public_folder: '/images',
@@ -27,7 +27,7 @@
               create: true,
               fields: [
                 { label: 'Citizen Name', name: 'title', widget: 'string' },
-                { label: 'Role', name: 'body', widget: 'markdown' }
+                { label: 'Role/Title', name: 'body', widget: 'markdown' }
               ]
             }
           ]
