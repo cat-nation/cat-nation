@@ -4,18 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Citizen Admin Console</title>
-    <!-- Loads from an alternate secure network -->
-    <script src="https://unpkg.com@^3.0.0/dist/decap-cms.js"></script>
   </head>
   <body>
     <script>
-      // Injects config settings cleanly into your webpage layout
+      window.CMS_MANUAL_INIT = true;
+    </script>
+
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+    <script>
       CMS.init({
         config: {
           backend: {
             name: 'github',
-            repo: 'cat-nation/cat-nation', // <-- EXPLICITLY TYPE YOUR GITHUB USERNAME/REPOSITORY NAME
-            branch: 'main' // <-- Switch to 'master' if your repo branch name is master
+            repo: 'cat-nation/cat-nation',
+            branch: 'main'
           },
           media_folder: 'images',
           public_folder: '/images',
