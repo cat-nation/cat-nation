@@ -1,12 +1,157 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citizen Admin Console</title>
-    <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css" />
-  </head>
-  <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Nation Admin</title>
+</head>
+<body>
+<script>
+const PASSWORD = 'setionmanA3';
+const USERNAME = 'admin';
+let citizens = JSON.parse(localStorage.getItem('cn-citizens') || '[]');
+let photoData = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('password-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  renderCitizens();
+});
+
+function doLogin() {
+  const u = document.getElementById('username-input').value.trim();
+  const p = document.getElementById('password-input').value;
+  if (u === USERNAME && p === PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-screen').style.display = 'block';
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+}
+
+function showTab(tab) {
+  document.getElementById('tab-list').style.display = tab === 'list' ? 'block' : 'none';
+  document.getElementById('tab-add').style.display = tab === 'add' ? 'block' : 'none';
+}
+
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoData = e.target.result;
+    const img = document.getElementById('photo-preview');
+    img.src = photoData;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function addCitizen() {
+  const name = document.getElementById('citizen-name').value.trim();
+  const role = document.getElementById('citizen-role').value;
+  const bio = document.getElementById('citizen-bio').value.trim();
+  if (!name) { alert('Please enter a citizen name.'); return; }
+  citizens.push({ name, role, bio, photo: photoData, id: Date.now() });
+  localStorage.setItem('cn-citizens', JSON.stringify(citizens));
+  document.getElementById('citizen-name').value = '';
+  document.getElementById('citizen-bio').value = '';
+  document.getElementById('photo-input').value = '';
+  document.getElementById('photo-preview').style.display = 'none';
+  photoData = null;
+  renderCitizens();
+  showTab('list');
+}
+
+function deleteCitizen(id) {
+  citizens = citizens.filter(c => c.id !== id);
+  localStorage.setItem('cn-citizens', JSON.stringify(citizens));
+  renderCitizens();
+}
+
+function renderCitizens() {
+  const list = document.getElementById('citizen-list');
+  const count = document.getElementById('citizen-count');
+  count.textContent = citizens.length + (citizens.length === 1 ? ' citizen' : ' citizens');
+  if (citizens.length === 0) {
+    list.innerHTML = '<p style="color:#888;text-align:center;">No citizens yet.</p>';
+    return;
+  }
+  list.innerHTML = citizens.map(c => `
+    <div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:center;">
+      ${c.photo ? `<img src="${c.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;" />` : `<div style="width:44px;height:44px;border-radius:50%;background:#e0e7ff;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#4f46e5;">${c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>`}
+      <div style="flex:1;">
+        <div style="font-weight:bold;">${c.name}</div>
+        <div style="font-size:13px;color:#666;">${c.role}</div>
+        ${c.bio ? `<div style="font-size:12px;color:#999;margin-top:2px;">${c.bio.slice(0,80)}${c.bio.length>80?'…':''}</div>` : ''}
+      </div>
+      <button onclick="deleteCitizen(${c.id})" style="padding:4px 10px;cursor:pointer;">Remove</button>
+    </div>
+  `).join('');
+}
+</script>
+
+<div id="login-screen" style="max-width:400px;margin:80px auto;padding:20px;">
+  <h1 style="text-align:center;">🐱 Cat Nation Admin</h1>
+  <div style="border:1px solid #ddd;border-radius:12px;padding:24px;">
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:13px;margin-bottom:4px;">Username</label>
+      <input id="username-input" type="text" placeholder="admin" style="width:100%;box-sizing:border-box;" />
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:13px;margin-bottom:4px;">Password</label>
+      <input id="password-input" type="password" placeholder="••••••••" style="width:100%;box-sizing:border-box;" />
+      <div id="login-error" style="color:red;font-size:13px;display:none;margin-top:4px;">Incorrect username or password.</div>
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:10px;cursor:pointer;background:#111;color:#fff;border:none;border-radius:8px;font-size:15px;">Log in</button>
+  </div>
+</div>
+
+<div id="main-screen" style="display:none;max-width:600px;margin:0 auto;padding:20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h2 style="margin:0;">Citizen Registry &nbsp;<span id="citizen-count" style="font-size:13px;background:#e0fce8;color:#166534;padding:3px 10px;border-radius:999px;font-weight:normal;"></span></h2>
+    <button onclick="logout()" style="cursor:pointer;">Log out</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;">
+    <button onclick="showTab('list')" style="cursor:pointer;padding:6px 14px;">All citizens</button>
+    <button onclick="showTab('add')" style="cursor:pointer;padding:6px 14px;">Add citizen</button>
+  </div>
+
+  <div id="tab-list">
+    <div id="citizen-list"></div>
+  </div>
+
+  <div id="tab-add" style="display:none;">
+    <div style="border:1px solid #ddd;border-radius:12px;padding:20px;">
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:13px;margin-bottom:4px;">Photo</label>
+        <img id="photo-preview" style="display:none;width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:8px;" />
+        <input id="photo-input" type="file" accept="image/*" onchange="previewPhoto(this)" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:13px;margin-bottom:4px;">Citizen name</label>
+        <input id="citizen-name" type="text" placeholder="e.g. Whiskers McGee" style="width:100%;box-sizing:border-box;" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:13px;margin-bottom:4px;">Role</label>
+        <select id="citizen-role" style="width:100%;box-sizing:border-box;">
+          <option>Citizen</option>
+          <option>Ambassador</option>
+          <option>Cabinet Minister</option>
+          <option>Noble</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:13px;margin-bottom:4px;">Biography</label>
+        <textarea id="citizen-bio" placeholder="Enter biography and records..." style="width:100%;box-sizing:border-box;height:100px;resize:vertical;"></textarea>
+      </div>
+      <button onclick="addCitizen()" style="width:100%;padding:10px;cursor:pointer;background:#111;color:#fff;border:none;border-radius:8px;font-size:15px;">Add citizen</button>
+    </div>
+  </div>
+</div>
+</body>
 </html>
