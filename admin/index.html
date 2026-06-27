@@ -3,15 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>National Citizen Registry - Admin Console</title>
-    <!-- Loads the dashboard UI from a CDN -->
-    <link rel="stylesheet" href="https://unpkg.com@^4.0.0/dist/main.css" />
+    <title>Citizen Admin Console</title>
+    <!-- Stable styles -->
+    <link rel="stylesheet" href="https://unpkg.com/@staticcms/core@^4.0.0/dist/main.css" />
   </head>
   <body>
-    <!-- The code runs completely here -->
-    <script src="https://unpkg.com@^4.0.0/dist/static-cms-core.js"></script>
+    <!-- Script that creates the visual board -->
+    <script src="https://unpkg.com/@staticcms/core@^4.0.0/dist/static-cms-core.js"></script>
     <script>
-      CMS.init();
+      // Automatically looks for your config.yml file in the same folder
+      window.CMS.init();
     </script>
   </body>
 </html>
