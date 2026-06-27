@@ -1,0 +1,16 @@
+backend:
+  name: github
+  repo: cat-nation/cat-nation
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "citizens"
+    label: "Citizen List"
+    folder: "citizens"
+    create: true
+    fields:
+      - { label: "Citizen Name", name: "title", widget: "string" }
+      - { label: "Role/Title", name: "body", widget: "markdown" }
