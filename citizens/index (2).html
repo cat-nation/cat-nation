@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Nation — Citizen Directory</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #111; }
+    header { background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%); color: #fff; padding: 32px 20px; text-align: center; }
+    header h1 { margin: 0 0 6px; font-size: 28px; }
+    header p { margin: 0; opacity: 0.75; font-size: 14px; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+    .search-bar { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; margin-bottom: 20px; }
+    .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 100px; text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 700; color: #3730a3; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; flex-shrink: 0; }
+    .id-badge { font-size: 11px; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-family: monospace; }
+    .role-badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+    .role-Noble { background: #fef9c3; color: #854d0e; }
+    .role-Ambassador { background: #dcfce7; color: #166534; }
+    .role-Cabinet { background: #fee2e2; color: #991b1b; }
+    .role-Citizen { background: #f1f5f9; color: #475569; }
+    .empty { text-align: center; color: #999; padding: 40px 0; font-size: 15px; }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 5px 12px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 12px; color: #555; }
+    .filter-btn.active { background: #1e1b4b; color: #fff; border-color: #1e1b4b; }
+    footer { text-align: center; color: #bbb; font-size: 12px; padding: 32px 0 16px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:36px;margin-bottom:8px;">🐱</div>
+  <h1>Cat Nation</h1>
+  <p>Official Citizen Directory</p>
+</header>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total citizens</div></div>
+    <div class="stat"><div class="stat-num" id="stat-nobles">0</div><div class="stat-label">Nobles</div></div>
+    <div class="stat"><div class="stat-num" id="stat-ambassadors">0</div><div class="stat-label">Ambassadors</div></div>
+    <div class="stat"><div class="stat-num" id="stat-ministers">0</div><div class="stat-label">Ministers</div></div>
+  </div>
+
+  <input class="search-bar" id="search" type="text" placeholder="🔍 Search citizens..." oninput="render()" />
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('All')">All</button>
+    <button class="filter-btn" onclick="setFilter('Noble')">Nobles</button>
+    <button class="filter-btn" onclick="setFilter('Ambassador')">Ambassadors</button>
+    <button class="filter-btn" onclick="setFilter('Cabinet Minister')">Ministers</button>
+    <button class="filter-btn" onclick="setFilter('Citizen')">Citizens</button>
+  </div>
+
+  <div id="citizen-list"></div>
+</div>
+
+<footer>Cat Nation &copy; Official Government Directory</footer>
+
+<script>
+  let citizens = [];
+  let activeFilter = 'All';
+
+  try {
+    citizens = JSON.parse(localStorage.getItem('cn-citizens') || '[]');
+  } catch(e) {}
+
+  function initials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  }
+
+  function roleClass(role) {
+    if (role === 'Noble') return 'role-Noble';
+    if (role === 'Ambassador') return 'role-Ambassador';
+    if (role === 'Cabinet Minister') return 'role-Cabinet';
+    return 'role-Citizen';
+  }
+
+  function setFilter(f) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === f || (f === 'All' && b.textContent === 'All')));
+    render();
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = citizens.length;
+    document.getElementById('stat-nobles').textContent = citizens.filter(c => c.role === 'Noble').length;
+    document.getElementById('stat-ambassadors').textContent = citizens.filter(c => c.role === 'Ambassador').length;
+    document.getElementById('stat-ministers').textContent = citizens.filter(c => c.role === 'Cabinet Minister').length;
+  }
+
+  function render() {
+    const query = document.getElementById('search').value.toLowerCase();
+    let list = [...citizens].sort((a,b) => (a.cnId||'').localeCompare(b.cnId||''));
+    if (activeFilter !== 'All') list = list.filter(c => c.role === activeFilter);
+    if (query) list = list.filter(c =>
+      c.name.toLowerCase().includes(query) ||
+      c.role.toLowerCase().includes(query) ||
+      (c.cnId && ('cn-' + c.cnId).includes(query))
+    );
+    const el = document.getElementById('citizen-list');
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty">No citizens found.</div>';
+      return;
+    }
+    el.innerHTML = list.map(c => `
+      <div class="card">
+        ${c.photo
+          ? `<img src="${c.photo}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;" />`
+          : `<div class="avatar">${initials(c.name)}</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+            <span style="font-weight:600;font-size:15px;">${c.name}</span>
+            ${c.cnId ? `<span class="id-badge">CN-${c.cnId}</span>` : ''}
+            <span class="role-badge ${roleClass(c.role)}">${c.role}</span>
+          </div>
+          ${c.bio ? `<div style="font-size:13px;color:#666;">${c.bio.slice(0,100)}${c.bio.length>100?'…':''}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  updateStats();
+  render();
+</script>
+</body>
+</html>
