@@ -4,15 +4,35 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Citizen Admin Console</title>
-    <!-- Stable styles -->
-    <link rel="stylesheet" href="https://unpkg.com/@staticcms/core@^4.0.0/dist/main.css" />
+    <link rel="stylesheet" href="https://unpkg.com@^4.0.0/dist/main.css" />
   </head>
   <body>
-    <!-- Script that creates the visual board -->
-    <script src="https://unpkg.com/@staticcms/core@^4.0.0/dist/static-cms-core.js"></script>
+    <script src="https://unpkg.com@^4.0.0/dist/static-cms-core.js"></script>
     <script>
-      // Automatically looks for your config.yml file in the same folder
-      window.CMS.init();
+      // This injects the configuration rules directly into the dashboard script
+      window.CMS.init({
+        config: {
+          backend: {
+            name: 'github',
+            repo: 'cat-nation/cat-nation', // <-- CHANGE THIS TO YOUR EXACT USERNAME/REPONAME
+            branch: 'main' // <-- Change to 'master' if your main branch is called master
+          },
+          media_folder: 'images',
+          public_folder: '/images',
+          collections: [
+            {
+              name: 'citizens',
+              label: 'Citizen List',
+              folder: 'citizens',
+              create: true,
+              fields: [
+                { label: 'Citizen Name', name: 'title', widget: 'string' },
+                { label: 'Role', name: 'body', widget: 'markdown' }
+              ]
+            }
+          ]
+        }
+      });
     </script>
   </body>
 </html>
