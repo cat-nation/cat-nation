@@ -1,21 +1,20 @@
 backend:
   name: github
-  repo: cat-nation/cat-nation # Change to your actual repo
-  branch: main # Your website branch
+  repo: cat-nation/cat-nation
+  branch: main
 
-media_folder: "images/citizens" # Where citizen photos will save
+media_folder: "images/citizens"
 public_folder: "/images/citizens"
 
 collections:
   - name: "citizens"
     label: "Citizen Registry"
-    folder: "data/citizens" # Where the citizen profile text files will save
-    create: true # Gives you the "Add New" button
-    slug: "citizen-{{id}}" # How the files will be named (e.g., citizen-001)
+    folder: "data/citizens"
+    create: true
+    slug: "citizen-{{id}}"
     fields:
       - { label: "National ID Number", name: "id", widget: "string" }
       - { label: "Full Legal Name", name: "title", widget: "string" }
       - { label: "Date of Citizenship", name: "date", widget: "datetime" }
       - { label: "National Status/Role", name: "role", widget: "select", options: ["Citizen", "Ambassador", "Cabinet Minister", "Noble"] }
-      - { label: "Profile Photo", name: "photo", widget: "image", required: false }
       - { label: "Biography & Records", name: "body", widget: "markdown" }
